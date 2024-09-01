@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Slf4j
-@EnableScheduling // 추가
+@EnableScheduling
 @SpringBootApplication
 public class BatchApplication {
 

@@ -25,10 +25,9 @@ public class BatchConfig extends DefaultBatchConfiguration {
     }
 
     public Step testStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-        Step step = new StepBuilder("testStep", jobRepository)
+        return new StepBuilder("testStep", jobRepository)
                 .tasklet(testTasklet(), transactionManager)
                 .build();
-        return step;
     }
 
     public Tasklet testTasklet() {
