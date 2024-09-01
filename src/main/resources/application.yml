@@ -1,0 +1,15 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: batch
+  datasource:
+    url: jdbc:mysql://127.0.0.1:33306/local?zeroDateTimeBehavior=convertToNull&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: local_user
+    password: local123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+  batch:
+    job:
+      enabled: false
