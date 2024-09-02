@@ -1,6 +1,7 @@
 package app.batch;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class BatchScheduler {
@@ -23,11 +25,14 @@ public class BatchScheduler {
     private final JobRegistry jobRegistry;
 
 
-    @Scheduled(cron = "0/15 * * * * *") // 10초마다 실행
+    @Scheduled(cron = "0/5 * * * * *") // 10초마다 실행
     public void runJob() {
         String time = LocalDateTime.now().toString();
         try {
-            Job job = jobRegistry.getJob("testJob"); // job 이름
+
+            log.info(jobRegistry.getJobNames().toString());
+
+            Job job = jobRegistry.getJob("simple"); // job 이름
 
             JobParametersBuilder jobParam = new JobParametersBuilder().addString("time", time);
 

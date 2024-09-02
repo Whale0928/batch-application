@@ -1,9 +1,12 @@
 package app.batch;
 
+import app.batch.core.service.ConsoleHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
+import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -17,9 +20,19 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RequiredArgsConstructor
 public class BatchConfig extends DefaultBatchConfiguration {
 
+    private final ConsoleHistoryService consoleHistoryService;
+
+    @Bean
+    public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
+        JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();
+        postProcessor.setJobRegistry(jobRegistry);
+        return postProcessor;
+    }
+
+
     @Bean
     public Job testJob(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-        return new JobBuilder("testJob", jobRepository)
+        return new JobBuilder("simple", jobRepository)
                 .start(testStep(jobRepository, transactionManager))
                 .build();
     }
@@ -32,8 +45,7 @@ public class BatchConfig extends DefaultBatchConfiguration {
 
     public Tasklet testTasklet() {
         return ((contribution, chunkContext) -> {
-            System.out.println("***** hello batch! *****");
-            // 원하는 비지니스 로직 작성
+            consoleHistoryService.eventPublish(contribution, chunkContext);
             return RepeatStatus.FINISHED;
         });
     }
