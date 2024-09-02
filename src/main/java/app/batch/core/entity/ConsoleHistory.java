@@ -1,6 +1,8 @@
 package app.batch.core.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,17 +16,17 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity(name = "console_history")
 public class ConsoleHistory {
     @Id
-    private UUID consoleId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long consoleId;
     private String var1;
     private String var2;
     private LocalDateTime createdAt;
 
     public static ConsoleHistory of(String var1, String var2) {
         return ConsoleHistory.builder()
-                .consoleId(UUID.randomUUID())
                 .var1(var1)
                 .var2(var2)
                 .createdAt(LocalDateTime.now())
