@@ -11,7 +11,6 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -24,8 +23,7 @@ public class BatchScheduler {
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
 
-
-    @Scheduled(cron = "0/5 * * * * *") // 10초마다 실행
+    //@Scheduled(cron = "0/20 * * * * *") // 20초마다 실행
     public void runJob() {
         String time = LocalDateTime.now().toString();
         try {
