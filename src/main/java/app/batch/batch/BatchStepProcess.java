@@ -1,8 +1,10 @@
-package app.batch;
+package app.batch.batch;
 
-import app.batch.domain.ImageHistory;
+import app.batch.appilication.ImageCommandProcess;
+import app.batch.domain.Alcohol;
 import app.batch.repository.JpaAlcoholRepository;
 import app.batch.repository.JpaImageHistoryRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
@@ -13,36 +15,16 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Component
 public class BatchStepProcess {
 
     private static final Logger log = LogManager.getLogger(BatchStepProcess.class);
     private final JpaAlcoholRepository alcoholRepository;
     private final JpaImageHistoryRepository imageHistoryRepository;
-
-    public BatchStepProcess(JpaAlcoholRepository alcoholRepository, JpaImageHistoryRepository imageHistoryRepository) {
-        this.alcoholRepository = alcoholRepository;
-        this.imageHistoryRepository = imageHistoryRepository;
-    }
-
-    public static void downloadImage(String imageUrl, String destinationFile) throws IOException {
-        URL url = new URL(imageUrl);
-        try (InputStream in = new BufferedInputStream(url.openStream());
-             FileOutputStream out = new FileOutputStream(destinationFile)) {
-            byte[] dataBuffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                out.write(dataBuffer, 0, bytesRead);
-            }
-        }
-    }
+    private final ImageCommandProcess imageCommandProcess;
 
     /**
      * testStep은 실제로 비즈니스 로직이 실행되는 부분입니다.
@@ -57,25 +39,11 @@ public class BatchStepProcess {
         return new StepBuilder("testStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
 
+                    List<Alcohol> alcohols = alcoholRepository.findAll();
 
-                    // JpaAlcoholRepository를 통해 모든 이미지 URL 데이터를 가져옴
-                    List<String> images = alcoholRepository.findAllImages();
-
-                    // 가져온 이미지 개수를 바탕으로 ImageHistory 엔티티 생성
-                    ImageHistory imageHistory = ImageHistory.create((long) images.size());
-
-                    // ImageHistory 엔티티를 데이터베이스에 저장
-                    ImageHistory save = imageHistoryRepository.save(imageHistory);
-
-                    // 저장된 엔티티의 ID가 null이면 실패로 간주하고 ExitStatus를 FAILED로 설정
-                    if (save.getId() == null) {
+                    if (alcohols.isEmpty()) {
                         contribution.setExitStatus(ExitStatus.FAILED);
-                    } else {
-                        // 성공적으로 저장되었다면 ExitStatus를 COMPLETED로 설정
-                        contribution.setExitStatus(ExitStatus.COMPLETED);
                     }
-
-                    // Tasklet이 정상적으로 종료되었음을 나타냄
                     return RepeatStatus.FINISHED;
                 }, transactionManager)
                 .build();
