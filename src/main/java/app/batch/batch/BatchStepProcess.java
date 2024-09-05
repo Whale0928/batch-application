@@ -3,7 +3,6 @@ package app.batch.batch;
 import app.batch.appilication.ImageCommandProcess;
 import app.batch.domain.Alcohol;
 import app.batch.repository.JpaAlcoholRepository;
-import app.batch.repository.JpaImageHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +22,6 @@ public class BatchStepProcess {
 
     private static final Logger log = LogManager.getLogger(BatchStepProcess.class);
     private final JpaAlcoholRepository alcoholRepository;
-    private final JpaImageHistoryRepository imageHistoryRepository;
     private final ImageCommandProcess imageCommandProcess;
 
     /**

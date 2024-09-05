@@ -1,6 +1,7 @@
 package app.batch.batch;
 
 import app.batch.appilication.ImageCommandProcess;
+import app.batch.appilication.S3Uploader;
 import app.batch.domain.Alcohol;
 import app.batch.domain.Mapping;
 import jakarta.persistence.EntityManagerFactory;
@@ -27,12 +28,13 @@ public class JpaPagingItemReaderJobConfiguration extends DefaultBatchConfigurati
     private final int CHUNK_SIZE = 10;
     private final EntityManagerFactory entityManagerFactory;
     private final ImageCommandProcess imageCommandProcess;
+    private final S3Uploader s3Uploader;
     private final ApplicationEventPublisher publisher;
-
 
     @Bean
     public Job jpaPagingItemReaderJob(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         long startAt = System.nanoTime();
+
         Job jpaPagingItemReaderJob = new JobBuilder("jpaPagingItemReaderJob", jobRepository)
                 .start(jpaPagingItemReaderStep(jobRepository, transactionManager))
                 .build();
@@ -61,7 +63,7 @@ public class JpaPagingItemReaderJobConfiguration extends DefaultBatchConfigurati
                 .name("jpaPagingItemReader")
                 .entityManagerFactory(entityManagerFactory)
                 .pageSize(CHUNK_SIZE)
-                .queryString("SELECT p FROM alcohol p order by p.id")
+                .queryString("select p from alcohol p order by p.id")
                 .build();
     }
 
@@ -69,7 +71,7 @@ public class JpaPagingItemReaderJobConfiguration extends DefaultBatchConfigurati
         return list -> {
             for (Alcohol alcohol : list) {
                 log.info("write thread name : {}, alcohol id : {}", Thread.currentThread().getName(), alcohol.getId());
-                Mapping mapping = imageCommandProcess.downloadImage(alcohol.getId(), alcohol.getImageUrl());
+                Mapping mapping = s3Uploader.downloadImage(alcohol.getId(), alcohol.getImageUrl());
                 publisher.publishEvent(mapping);
             }
         };
